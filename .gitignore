@@ -5,3 +5,8 @@ package-lock.json
 .aider*
 .env
 opencode
+
+# Workspace task and Bun caches
+.turbo/
+.bun/
+bun-debug.log*
