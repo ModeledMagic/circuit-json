@@ -8,6 +8,7 @@ export * from "./properties/route_hint_point"
 export * from "./properties/manufacturing_drc_properties"
 
 export * from "./pcb_component"
+export * from "./pcb_debug_object"
 export * from "./pcb_hole"
 export * from "./pcb_plated_hole"
 export * from "./pcb_port"
@@ -17,6 +18,7 @@ export * from "./pcb_text"
 export * from "./pcb_trace"
 export * from "./pcb_trace_warning"
 export * from "./pcb_trace_too_long_warning"
+export * from "./pcb_trace_too_many_vias_warning"
 export * from "./pcb_trace_error"
 export * from "./pcb_trace_missing_error"
 export * from "./pcb_port_not_matched_error"
@@ -58,6 +60,7 @@ export * from "./pcb_group"
 export * from "./pcb_autorouting_error"
 export * from "./pcb_manual_edit_conflict_warning"
 export * from "./pcb_connector_not_in_accessible_orientation_warning"
+export * from "./pcb_component_missing_courtyard_warning"
 export * from "./supplier_footprint_mismatch_warning"
 export * from "./pcb_breakout_point"
 export * from "./pcb_ground_plane"
@@ -78,6 +81,7 @@ export * from "./pcb_courtyard_circle"
 export * from "./pcb_courtyard_pill"
 
 import type { PcbComponent } from "./pcb_component"
+import type { PcbDebugObject } from "./pcb_debug_object"
 import type { PcbHole } from "./pcb_hole"
 import type { PcbPlatedHole } from "./pcb_plated_hole"
 import type { PcbPort } from "./pcb_port"
@@ -87,6 +91,7 @@ import type { PcbText } from "./pcb_text"
 import type { PcbTrace } from "./pcb_trace"
 import type { PcbTraceWarning } from "./pcb_trace_warning"
 import type { PcbTraceTooLongWarning } from "./pcb_trace_too_long_warning"
+import type { PcbTraceTooManyViasWarning } from "./pcb_trace_too_many_vias_warning"
 import type { PcbTraceError } from "./pcb_trace_error"
 import type { PcbTraceMissingError } from "./pcb_trace_missing_error"
 import type { PcbPortNotMatchedError } from "./pcb_port_not_matched_error"
@@ -102,6 +107,7 @@ import type { PcbMissingFootprintError } from "./pcb_missing_footprint_error"
 import type { ExternalFootprintLoadError } from "./external_footprint_load_error"
 import type { PcbManualEditConflictWarning } from "./pcb_manual_edit_conflict_warning"
 import type { PcbConnectorNotInAccessibleOrientationWarning } from "./pcb_connector_not_in_accessible_orientation_warning"
+import type { PcbComponentMissingCourtyardWarning } from "./pcb_component_missing_courtyard_warning"
 import type { SupplierFootprintMismatchWarning } from "./supplier_footprint_mismatch_warning"
 import type { PcbTraceHint } from "./pcb_trace_hint"
 import type { PcbSilkscreenLine } from "./pcb_silkscreen_line"
@@ -144,6 +150,7 @@ import type { PcbCourtyardPill } from "./pcb_courtyard_pill"
 
 export type PcbCircuitElement =
   | PcbComponent
+  | PcbDebugObject
   | PcbHole
   | PcbPlatedHole
   | PcbPort
@@ -153,6 +160,7 @@ export type PcbCircuitElement =
   | PcbTrace
   | PcbTraceWarning
   | PcbTraceTooLongWarning
+  | PcbTraceTooManyViasWarning
   | PcbTraceError
   | PcbTraceMissingError
   | PcbMissingFootprintError
@@ -160,6 +168,7 @@ export type PcbCircuitElement =
   | CircuitJsonFootprintLoadError
   | PcbManualEditConflictWarning
   | PcbConnectorNotInAccessibleOrientationWarning
+  | PcbComponentMissingCourtyardWarning
   | SupplierFootprintMismatchWarning
   | PcbPortNotMatchedError
   | PcbPortNotConnectedError

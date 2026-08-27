@@ -35,6 +35,7 @@ https://github.com/user-attachments/assets/2f28b7ba-689e-4d80-85b2-5bdef84b41f8
 - Display [PCBs on the web](https://github.com/tscircuit/pcb-viewer)
 - Display [Schematics on the web](https://github.com/tscircuit/schematic-viewer)
 - Display [3d models of electronics on the web](https://github.com/tscircuit/3d-viewer)
+- Render [Circuit JSON to a GLTF](https://github.com/tscircuit/circuit-json-to-gltf)
 
 ## Table of Contents
 
@@ -123,6 +124,7 @@ https://github.com/user-attachments/assets/2f28b7ba-689e-4d80-85b2-5bdef84b41f8
     - [PcbCourtyardPolygon](#pcbcourtyardpolygon)
     - [PcbCourtyardRect](#pcbcourtyardrect)
     - [PcbCutout](#pcbcutout)
+    - [PcbDebugObject](#pcbdebugobject)
     - [PcbFabricationNoteDimension](#pcbfabricationnotedimension)
     - [PcbFabricationNotePath](#pcbfabricationnotepath)
     - [PcbFabricationNoteRect](#pcbfabricationnoterect)
@@ -167,6 +169,7 @@ https://github.com/user-attachments/assets/2f28b7ba-689e-4d80-85b2-5bdef84b41f8
     - [PcbTraceHint](#pcbtracehint)
     - [PcbTraceMissingError](#pcbtracemissingerror)
     - [PcbTraceTooLongWarning](#pcbtracetoolongwarning)
+    - [PcbTraceTooManyViasWarning](#pcbtracetoomanyviaswarning)
     - [PcbTraceWarning](#pcbtracewarning)
     - [PcbVia](#pcbvia)
     - [PcbViaClearanceError](#pcbviaclearanceerror)
@@ -177,9 +180,11 @@ https://github.com/user-attachments/assets/2f28b7ba-689e-4d80-85b2-5bdef84b41f8
     - [SchematicCircle](#schematiccircle)
     - [SchematicComponent](#schematiccomponent)
     - [SchematicComponentOverlapWarning](#schematiccomponentoverlapwarning)
+    - [SchematicComponentStylingWarning](#schematiccomponentstylingwarning)
     - [SchematicDebugObject](#schematicdebugobject)
     - [SchematicElementOutsideSheetWarning](#schematicelementoutsidesheetwarning)
     - [SchematicError](#schematicerror)
+    - [SchematicGraphic](#schematicgraphic)
     - [SchematicGroup](#schematicgroup)
     - [SchematicLayoutError](#schematiclayouterror)
     - [SchematicLine](#schematicline)
@@ -1210,6 +1215,7 @@ interface SourceTrace {
   subcircuit_id?: string
   subcircuit_connectivity_map_key?: string
   max_length?: number
+  max_via_count?: number
   name?: string
   display_name?: string
   min_trace_thickness?: number
@@ -1351,6 +1357,8 @@ interface PcbBoard extends ManufacturingDrcProperties {
   display_offset_y?: string
   thickness: Length
   num_layers: number
+  /** Whether autorouters may generate blind and buried vias. */
+  allow_blind_and_buried_vias?: boolean
   center: Point
   outline?: Point[]
   shape?: "rect" | "polygon"
@@ -1379,6 +1387,7 @@ interface PcbBreakoutPoint {
   source_trace_id?: string
   source_port_id?: string
   source_net_id?: string
+  layer?: LayerRef
   x: Distance
   y: Distance
 }
@@ -1681,6 +1690,43 @@ interface PcbCutoutRect {
   height: Length
   rotation?: Rotation
   corner_radius?: Length
+}
+```
+
+### PcbDebugObject
+
+[Source](https://github.com/tscircuit/circuit-json/blob/main/src/pcb/pcb_debug_object.ts)
+
+```typescript
+type PcbDebugObject = PcbDebugRect | PcbDebugLine | PcbDebugPoint
+
+interface PcbDebugRect {
+  type: "pcb_debug_object"
+  pcb_debug_object_id: string
+  label?: string
+  shape: "rect"
+  center: Point
+  size: Size
+  subcircuit_id?: string
+}
+
+interface PcbDebugLine {
+  type: "pcb_debug_object"
+  pcb_debug_object_id: string
+  label?: string
+  shape: "line"
+  start: Point
+  end: Point
+  subcircuit_id?: string
+}
+
+interface PcbDebugPoint {
+  type: "pcb_debug_object"
+  pcb_debug_object_id: string
+  label?: string
+  shape: "point"
+  center: Point
+  subcircuit_id?: string
 }
 ```
 
@@ -2785,6 +2831,28 @@ interface PcbTraceTooLongWarning {
 }
 ```
 
+### PcbTraceTooManyViasWarning
+
+[Source](https://github.com/tscircuit/circuit-json/blob/main/src/pcb/pcb_trace_too_many_vias_warning.ts)
+
+Warning emitted when a PCB trace has more vias than its maximum allowed count
+
+```typescript
+/** Warning emitted when a PCB trace has more vias than its maximum allowed count */
+interface PcbTraceTooManyViasWarning {
+  type: "pcb_trace_too_many_vias_warning"
+  pcb_trace_too_many_vias_warning_id: string
+  warning_type: "pcb_trace_too_many_vias_warning"
+  message: string
+  pcb_trace_id: string
+  source_net_id?: string
+  source_trace_id?: string
+  actual_via_count: number
+  maximum_via_count: number
+  subcircuit_id?: string
+}
+```
+
 ### PcbTraceWarning
 
 [Source](https://github.com/tscircuit/circuit-json/blob/main/src/pcb/pcb_trace_warning.ts)
@@ -3031,6 +3099,28 @@ interface SchematicComponentOverlapWarning {
 }
 ```
 
+### SchematicComponentStylingWarning
+
+[Source](https://github.com/tscircuit/circuit-json/blob/main/src/schematic/schematic_component_styling_warning.ts)
+
+Warning emitted when a schematic component has a visual styling issue
+
+```typescript
+/** Warning emitted when a schematic component has a visual styling issue */
+interface SchematicComponentStylingWarning {
+  type: "schematic_component_styling_warning"
+  schematic_component_styling_warning_id: string
+  warning_type: "schematic_component_styling_warning"
+  message: string
+  schematic_component_id: string
+  styling_issue_type: string
+  schematic_port_ids?: string[]
+  source_component_id?: string
+  schematic_sheet_id?: string
+  subcircuit_id?: string
+}
+```
+
 ### SchematicDebugObject
 
 [Source](https://github.com/tscircuit/circuit-json/blob/main/src/schematic/schematic_debug_object.ts)
@@ -3100,6 +3190,29 @@ interface SchematicError extends BaseCircuitJsonError {
   schematic_error_id: string
   error_type: "schematic_port_not_found"
   subcircuit_id?: string
+}
+```
+
+### SchematicGraphic
+
+[Source](https://github.com/tscircuit/circuit-json/blob/main/src/schematic/schematic_graphic.ts)
+
+References a graphic asset or inline SVG content with optional centered layout bounds on a schematic sheet. At least one graphic source is required.
+
+```typescript
+/** References a graphic asset or inline SVG content on a schematic sheet. */
+interface SchematicGraphic {
+  type: "schematic_graphic"
+  schematic_graphic_id: string
+  schematic_sheet_id?: string
+  /** Optional canonical source asset; at least one graphic source is required. */
+  asset?: Asset
+  /** Optional inline SVG source or materialized fallback content. */
+  svg_content?: string
+  /** Positive centered layout width in schematic units. */
+  width?: number
+  /** Positive centered layout height in schematic units. */
+  height?: number
 }
 ```
 
@@ -3256,6 +3369,7 @@ interface SchematicPort {
   true_ccw_index?: number
   pin_number?: number
   display_pin_label?: string
+  display_pin_label_font_size?: number
   subcircuit_id?: string
   is_connected?: boolean
   is_internal_circuit_port?: boolean
@@ -3306,6 +3420,9 @@ interface SchematicSheet {
   schematic_sheet_id: string
   name?: string
   sheet_index?: number
+  sheet_size?: "a4" | "ansi_b"
+  sheet_width?: number
+  sheet_height?: number
   subcircuit_id?: string
   outline_color?: string
 }
